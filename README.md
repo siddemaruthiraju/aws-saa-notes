@@ -19,4 +19,4 @@
 - [ ] Auto Scaling
 - [ ] CloudFormation
 
-## Started: April 21, 2026
+## Started: June 1, 2026
