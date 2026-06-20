@@ -4,7 +4,7 @@
 ## About Me
 - 2024 B.Tech Graduate
 - Preparing for AWS Solutions Architect Associate
-- Target exam date: May 29, 2026
+- Target exam date: september 10, 2026
 - Location: Hyderabad, India
 
 ## Topics Progress
@@ -19,4 +19,4 @@
 - [ ] Auto Scaling
 - [ ] CloudFormation
 
-## Started: June 1, 2026
+## Started: June 19, 2026
