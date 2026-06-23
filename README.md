@@ -8,8 +8,8 @@
 - Location: Hyderabad, India
 
 ## Topics Progress
-- [ ] IAM
-- [ ] EC2
+- [X] IAM
+- [ ] EC2 ← in progress
 - [ ] S3
 - [ ] VPC
 - [ ] RDS
