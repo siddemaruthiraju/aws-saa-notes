@@ -9,7 +9,7 @@
 
 ## Topics Progress
 - [X] IAM
-- [ ] EC2
+- [ ] EC2 ← in progress
 - [ ] S3
 - [ ] VPC
 - [ ] RDS
