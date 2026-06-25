@@ -164,3 +164,135 @@ Date: 23 June 2026
 
 \- 3389 = RDP (Remote Desktop Protocol) - log into a Windows instance
 
+
+
+
+
+\## EC2 Instance Connect
+
+\- Go to EC2 → click on your instance → click Connect
+
+\- Here we have different options to connect:
+
+&#x20; - EC2 Instance Connect
+
+&#x20; - EC2 Instance Session Manager
+
+&#x20; - SSH Client
+
+&#x20; - EC2 Serial Console
+
+\- We will be connecting through the EC2 Instance Connect
+
+
+
+\## EC2 Instance Roles Demo
+
+\- Never enter your AWS Access Keys inside the EC2 instance
+
+\- Instead we use IAM Roles
+
+\- First create a IAM Role:
+
+&#x20; - Go to IAM Roles → Create Role
+
+&#x20; - AWS Service → Choose EC2
+
+&#x20; - Then Add permissions → Create the Role
+
+\- Go to EC2 Instance → Security → Modify IAM Role
+
+\- Then select your IAM Role and attach it
+
+\- Go to EC2 Instance Connect → Type AWS commands
+
+\- You can see the list
+
+
+
+\## EC2 Instances Purchasing Options
+
+\- On Demand Instances: short workload, predictable pricing, pay by second
+
+\- Reserved (1 \& 3 years):
+
+&#x20; - Long workloads
+
+&#x20; - Convertible Reserved: long workloads with flexible instances
+
+\- Savings Plan (1 \& 3 years): commitment to an amount of usage, long workload
+
+\- Spot Instances: short workloads, cheap, can lose instances (bid B, highest of B)
+
+\- Dedicated Host: book an entire physical server, control instance placement
+
+\- Dedicated Instances: no other customers will share your hardware
+
+\- Capacity Reservations: reserve capacity in a specific AZ for any duration
+
+
+
+\## Private vs Public vs Elastic IP (IPv4)
+
+\### Fundamentals of Public IP (IPv4)
+
+\- Public IP means the machine can be identified on the internet (www)
+
+\- Must be unique across the whole internet (2 machines cannot have same public IP)
+
+\- Can be geo located easily
+
+
+
+\### Private IP
+
+\- Private IP means the machine can only be identified on a private network only
+
+\- Machine can have same private IP if on different network
+
+\- It must be unique across the private network
+
+\- Machines connect to internet using a NAT + internet gateway (a proxy)
+
+\- Only a specified range of IPs can be used as private IP
+
+
+
+\### Elastic IP
+
+\- If you need to have a fixed public IP to your instance you need Elastic IP
+
+\- An Elastic IP is a public IPv4 you own as long as you don't delete it
+
+\- You can attach it to one instance at a time
+
+\- Try to avoid using Elastic IP:
+
+&#x20; - Instead use a random public IP and register a DNS name to it
+
+&#x20; - Or use a Load Balancer
+
+\- Placement Group: sometimes EC2 instance wants Placement Group because the EC2 instance needs control over Placement Strategy
+
+
+
+\## EC2 Instance Launch Types Hands On
+
+\### EC2 Solutions Architect Associate Level
+
+\- Private vs Public IP (IPv4)
+
+\- IPv4: 1.160.10.240
+
+\- IPv6: 3ffe:1900:4545:3:200:f8ff:fe21:67cf
+
+\- Private networking has two sorts of IPs: Public IP (IPv4) and Private IPv4
+
+\- We use still mostly IPv4 (most common format used online)
+
+\- IPv6 is new and solves the problem of IoT
+
+\- IPv4 allows for 3.7 billion different addresses in the public space
+
+\- IPv4: \[0-255].\[0-255].\[0-255].\[0-255]
+
