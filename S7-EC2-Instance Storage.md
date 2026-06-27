@@ -68,3 +68,17 @@
 
 \- \*\*Use case:\*\* Preserve the root volume when an instance is terminated
 
+## EBS — Extra Points
+
+- EBS volumes are **locked to one AZ** — to move to another AZ, take a snapshot and restore it there
+- Snapshots are stored in **S3** (managed by AWS, you don't see the bucket)
+- **EBS Snapshot Archive** — move snapshots to a cheaper archive tier, takes 24–72 hrs to restore
+- **Recycle Bin for Snapshots** — accidentally deleted snapshots can be recovered if retention rule is set
+- **Fast Snapshot Restore (FSR)** — eliminates latency on first use of a restored snapshot (costs extra)
+- EBS volumes can be **increased in size** but never decreased
+- **GP2 vs GP3** — GP3 you set IOPS and throughput independently; GP2 IOPS is tied to size (3 IOPS/GB)
+- **io1/io2** — for databases needing high IOPS (up to 64,000 IOPS)
+- **Multi-Attach** — io1/io2 only, attach same volume to multiple EC2s in same AZ
+- When an EC2 is terminated, **root EBS is deleted by default** but additional volumes are not
+
+
