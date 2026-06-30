@@ -194,3 +194,36 @@ US-EAST-1A                              US-EAST-1B
 9. Go to instance → copy **Public IP** → paste in URL
 10. **It works!**
 
+
+# EC2 Instance Store
+
+## What is it?
+- EBS volumes are **network drives** with good but **"limited" performance**.
+- If you need **high performance hardware disk**, use an **EC2 Instance Store** instead.
+
+## Key Characteristic
+- **Better I/O performance** than EBS volumes.
+- Physically attached to the host hardware running the instance (not network-attached).
+
+## Important: Ephemeral Storage
+- Instance Store loses its data **if the instance is stopped** (it's **ephemeral**).
+- Data is **only available** for the lifetime of the instance.
+
+## Best Use Cases
+- Buffer / cache / scratch data
+- Temporary content
+- Data that gets replicated or backed up elsewhere
+
+## Risks
+- **Risk of data loss** if the underlying hardware fails.
+- **Backups and replication are YOUR responsibility** — AWS does not handle this for you.
+
+---
+### Quick Comparison: EBS vs Instance Store
+| Feature | EBS | Instance Store |
+|---|---|---|
+| Performance | Good (network drive) | Higher (physically attached) |
+| Persistence | Persists after stop | Lost on stop (ephemeral) |
+| Use case | General purpose, durable storage | High-performance temp/cache data |
+| Backup responsibility | Snapshots available | Fully on you |
+
