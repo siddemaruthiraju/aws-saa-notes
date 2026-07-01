@@ -227,3 +227,159 @@ US-EAST-1A                              US-EAST-1B
 | Use case | General purpose, durable storage | High-performance temp/cache data |
 | Backup responsibility | Snapshots available | Fully on you |
 
+
+# Section 7: EC2 Instance Storage — EBS & EFS
+
+## EBS Volume Types
+
+**6 types**, requiring different use cases:
+- **gp2 / gp3 (SSD)**: General purpose SSD — balances price and performance for a wide variety of workloads
+- **io1 / io2 Block Express (SSD)**: High performance SSD for mission-critical, low-latency or high-throughput workloads
+- **st1 (HDD)**: Low-cost HDD volume designed for frequently accessed, throughput-intensive workloads
+- **sc1 (HDD)**: Lowest-cost HDD volume designed for less frequently accessed workloads
+
+EBS volumes are characterized by **size, IOPS (I/O operations per sec), and throughput**.
+
+> When in doubt, always consult the AWS documentation — that's good practice.
+
+Only **gp2/gp3** and **io1/io2 Block Express** can be used as **boot volumes**.
+
+---
+
+### General Purpose SSD (gp2/gp3)
+
+- Cost-effective storage, low latency
+- Use cases: system boot volumes, virtual desktops, dev & test environments
+- Size range: **1 GiB – 16 TiB**
+
+**gp3:**
+- Baseline: **3,000 IOPS** + **125 MiB/s** throughput
+- Can increase IOPS up to **16,000** and throughput up to **1,000 MiB/s** independently of size
+
+**gp2:**
+- Size and IOPS are linked — **3 IOPS per GiB**
+- Small gp2 volumes can burst IOPS to **3,000**
+- Max IOPS: **16,000** (reached at 5,334 GiB)
+
+---
+
+### Provisioned IOPS (PIOPS) SSD — io1/io2
+
+- For critical business applications needing **sustained IOPS performance**
+- For applications needing **more than 16,000 IOPS**
+- Great for database workloads (sensitive to storage performance & consistency)
+
+**io1** (4 GiB – 16 TiB):
+- Max PIOPS: **64,000** for Nitro EC2 instances, **32,000** for other instance types
+- Can increase PIOPS independently from storage size
+
+**io2 Block Express** (4 GiB – 64 TiB):
+- Sub-millisecond latency
+- Max PIOPS: **256,000** with an IOPS:GiB ratio of **1,000:1**
+- Supports EBS Multi-Attach
+
+---
+
+### Hard Disk Drives (HDD)
+
+- Cannot be used as a boot volume
+- Size range: **125 GiB – 16 TiB**
+
+**Throughput Optimized HDD (st1):**
+- Low-cost HDD volume designed for frequently accessed, throughput-intensive workloads
+- Use cases: big data, data warehouses, log processing
+- Max throughput: **500 MiB/s** — Max IOPS: **500**
+
+**Cold HDD (sc1):**
+- Lowest-cost HDD volume for infrequently accessed data
+- For scenarios where lowest cost is important
+- Max throughput: **250 MiB/s** — Max IOPS: **250**
+
+---
+
+## EBS Multi-Attach — io1/io2 family only
+
+- Attach the **same EBS volume** to multiple EC2 instances **within the same AZ**
+- Each instance has full read & write permission to the high-performance volume
+- Use case: achieve higher application availability in clustered Linux applications (e.g., Teradata)
+- Applications must manage concurrent write operations
+- Up to **16 EC2 instances** at a time
+- Must use a file system that's cluster-aware (not XFS, EXT4, etc. — those aren't cluster-aware)
+
+---
+
+## EBS Encryption
+
+- When you create an encrypted EBS volume:
+  - Data **at rest** is encrypted inside the volume
+  - All data **in flight** moving between the instance and the volume is encrypted
+  - All **snapshots** are encrypted
+  - All **volumes created from the snapshot** are encrypted
+- Encryption & decryption are handled **transparently** — you have nothing to do
+- Encryption has **minimal impact on latency**
+- EBS Encryption leverages keys from **KMS (AES-256)**
+- Copying an **unencrypted snapshot** allows encryption
+- Snapshots of encrypted volumes are encrypted
+
+### Encrypting an Unencrypted EBS Volume
+1. Create an EBS snapshot of the volume (unencrypted)
+2. Encrypt the EBS snapshot (using copy)
+3. Create a new EBS volume from the snapshot (the volume will also be encrypted)
+4. Attach the encrypted volume to the original instance
+
+---
+
+## Amazon EFS — Elastic File System
+
+- Managed **NFS (Network File System)** that can be mounted on many EC2 instances
+- Works with EC2 instances in **Multi-AZ**
+- Highly available, scalable, but **expensive** (~3x gp2 pricing) — pay per use
+
+us-east-1a      us-east-1b      us-east-1c
+  [Instance]      [Instance]      [Instance]
+       \               |               /
+        \______________|______________/
+                Security Group
+
+- Use cases: content management, web serving, data sharing, WordPress
+- Uses **NFSv4.1** protocol
+- Uses Security Group to control access to EFS
+- Compatible with Linux-based AMI (not Windows)
+- Encryption at rest using KMS
+- **POSIX file system** (~Linux) with a standard file API
+- File system **scales automatically**, pay-per-use, no capacity planning
+
+### EFS Performance & Storage Classes
+
+**EFS Scale:**
+- Supports thousands of concurrent NFS clients, **10 GB+/s** throughput
+- Grows to **petabyte-scale** network file system automatically
+
+**Performance Mode** (set at EFS creation time):
+- **General Purpose (default)**: latency-sensitive use cases (web server, CMS, etc.)
+- **Max I/O**: higher latency/throughput, highly parallel (big data, media processing)
+
+**Throughput Mode:**
+- **Bursting**: 1 TB = 50 MiB/s baseline + burst up to 100 MiB/s
+- **Provisioned**: Set your throughput regardless of storage size (e.g., 1 GiB/s for 1 TB storage)
+- **Elastic**: Automatically scales throughput up or down based on your workload
+  - Up to **3 GiB/s** for reads, **1 GiB/s** for writes
+  - Used for unpredictable workloads
+
+### EFS Storage Classes
+
+- **Storage Tiers** (lifecycle management feature — move file after N days)
+- **Standard**: for frequently accessed files
+- **Infrequent Access (EFS-IA)**: lower cost to store, cost to retrieve files
+- **Archive**: rarely accessed data (few times each year), **~50% cheaper**
+- Implement **lifecycle policies** to move files between storage tiers automatically
+
+### EFS Availability & Durability
+
+- **Standard (Multi-AZ)**: great for production
+- **One Zone**: single AZ, great for dev/backup — backup enabled by default, compatible with IA (EFS One Zone IA)
+- **Over 90% in cost savings** when combining One Zone + IA
+
+
+
+
