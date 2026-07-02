@@ -381,5 +381,104 @@ us-east-1a      us-east-1b      us-east-1c
 - **Over 90% in cost savings** when combining One Zone + IA
 
 
+# EBS vs EFS (Elastic File System)
+
+## EBS Volumes — Quick Recap
+- An EBS volume can only be attached to one instance at a time (except Multi-Attach io1/io2 volumes).
+- EBS volumes are locked at the Availability Zone (AZ) level.
+- gp2: IOPS increase as disk size increases.
+- gp3 & io1: IOPS can be increased independently of disk size.
+
+### Migrating an EBS Volume Across AZs
+1. Take a snapshot of the volume.
+2. Restore the snapshot into a new volume in the target AZ.
+
+Note: EBS backups use IO and you shouldn't run them while your application is handling a lot of traffic.
+
+- Root EBS volumes of an instance are terminated by default when the EC2 instance is terminated (this behavior can be disabled).
+
+Diagram:
+AZ 1                          AZ 2
+[EC2] --- EBS                 [EC2] --- EBS
+   |                                       |
+Snapshot ---> EBS Snapshot <--- Restore ---
+
+---
+
+## Elastic File System (EFS)
+- Managed NFS (Network File System) that can be mounted on hundreds of EC2 instances across multiple AZs.
+- Common use case: EFS works well with shared website files (e.g., WordPress).
+- Only compatible with Linux instances (POSIX filesystem).
+- EFS has a higher price point than EBS.
+- Can leverage Storage Tiers for significant cost savings — over 90% in cost savings possible (e.g., moving infrequently accessed files to Infrequent Access tier).
+
+### Remember: EFS vs EBS vs Instance Store
+| Storage | Attach Scope | AZ Scope | OS Support |
+|---|---|---|---|
+| Instance Store | Single instance | Single AZ | Any |
+| EBS | Single instance (Multi-Attach = exception) | Single AZ | Any |
+| EFS | Hundreds of instances | Across multiple AZs | Linux only |
+
+Architecture:
+AZ 1                          AZ 2
+[Linux EC2]                   [Linux EC2]
+     |                              |
+EFS Mount Target             EFS Mount Target
+     |                              |
+     -------------- EFS -------------
+
+---
+
+## Amazon EFS — Hands-On Lab
+
+### 1. Create the File System
+1. Go to Amazon EFS console.
+2. Click Create a file system.
+3. Select VPC.
+4. Choose Customize (instead of quick create).
+5. File system type: Regional or One Zone.
+6. Enable automatic backups.
+7. Lifecycle management — configure as needed.
+8. Performance settings:
+   - Throughput mode: Enhanced or Elastic
+   - Additional settings: General Purpose
+9. Network access: select the VPC.
+10. Under Security Groups: create one SG, and add that SG group to it.
+11. File system policy — optional.
+12. Review and Create.
+13. Your Amazon EFS is created.
+
+### 2. Create EC2 Instances
+1. Create an EC2 instance, configure all settings, add subnet.
+2. Under File system: Add EFS, select the EFS file system.
+3. Launch the instance.
+4. Create a second instance — same setup, but with a different subnet/region (AZ).
+5. Launch it.
+
+### 3. Check EFS Network Access
+- Go to the EFS file system → Network tab.
+- You can see all the Availability Zones and mount targets (Zone 1A, etc.), and their SGs — these SGs are auto-created and attached to EFS.
+
+### 4. Test Cross-Instance File Sharing
+
+On Instance A, run:
+ls /mnt/efs/fs1/
+sudo su
+echo "hello world" > /mnt/efs/fs1/hello.txt
+cat /mnt/efs/fs1/hello.txt
+Output: hello world
+
+On Instance B, run:
+ls /mnt/efs/fs1/
+Output: hello.txt
+cat /mnt/efs/fs1/hello.txt
+Output: hello world
+
+Result: Both instances share the same EFS file system — a file written from Instance A is instantly visible and readable from Instance B, confirming EFS's cross-AZ, multi-instance shared storage.
+
+---
+
+
+
 
 
