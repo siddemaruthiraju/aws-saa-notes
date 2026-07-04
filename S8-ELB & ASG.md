@@ -153,6 +153,45 @@
 &#x20; - Route 53, AWS WAF, AWS Global Accelerator
 
 
+---
+
+## Health Checks
+
+- Health checks are crucial for load balancers.
+- It is a way for a load balancer to know if an instance is available to reply to requests.
+- The health check is done on a port and a route (`/health` is common).
+- If the response is not `200 (OK)`, then the instance is deemed **unhealthy**.
+
+Example health check configuration:
+- **Protocol:** HTTP
+- **Port:** 4567
+- **Endpoint:** `/health`
+
+---
+
+## Types of Load Balancer on AWS
+
+AWS has 4 kinds of managed Load Balancers:
+
+1. **Classic Load Balancer (CLB)** — 2009
+   - Supports: HTTP, HTTPS, TCP, SSL
+
+2. **Application Load Balancer (ALB)** — 2016 (new generation)
+   - Supports: HTTP, HTTPS, WebSocket
+
+3. **Network Load Balancer (NLB)** — 2017 (new generation)
+   - Supports: TCP, TLS (secure TCP), UDP
+
+4. **Gateway Load Balancer (GWLB)** — 2020
+   - Operates at Layer 3 (Network Layer) — IP Protocol
+
+### Notes
+
+- It's generally better to use the newer generation load balancers (ALB, NLB, GWLB) as they provide more features.
+- Load Balancers can be set up as:
+  - **Internal** (private)
+  - **External** (public)
+- ELBs use **Security Groups** to control inbound/outbound traffic.
 
 
 
