@@ -478,7 +478,14 @@ Result: Both instances share the same EFS file system — a file written from In
 
 ---
 
+S7 Recap - EC2 Instance Storage
 
+- EBS volumes are network-attached block storage, tied to a single AZ - can't attach across AZs
+- Instance Store gives higher IOPS but is ephemeral - data lost on stop/terminate
+- EBS snapshots are incremental after the first one, stored in S3 behind the scenes
+- Can restore a snapshot to a new volume in a different AZ (snapshot itself isn't AZ-locked, only the volume is)
+- EBS volume types: gp3 (general purpose SSD, cost-effective), io2 (high performance, critical workloads)
+- Can resize EBS volumes live without downtime, but need to extend the filesystem after
 
 
 
