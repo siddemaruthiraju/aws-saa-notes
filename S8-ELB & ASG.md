@@ -194,4 +194,26 @@ AWS has 4 kinds of managed Load Balancers:
 - ELBs use **Security Groups** to control inbound/outbound traffic.
 
 
+\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+
+
+# Section 8 — Application Load Balancer (ALB) Notes
+
+- ALB operates at Layer 7 (HTTP/HTTPS) — can inspect and route based on
+  content, not just IP/port like NLB (Layer 4)
+- Routing based on: path (/api/*, /images/*), hostname (api.example.com
+  vs www.example.com), HTTP headers/query strings, or source IP
+- Supports multiple target groups — one ALB can route to EC2 instances,
+  ECS tasks, Lambda functions, or even IP addresses as targets
+- Target groups have their own health checks — ALB stops sending traffic
+  to unhealthy targets
+- Sticky sessions (session affinity) can be enabled at the target group
+  level using an ALB-generated cookie — keeps a user's requests going to
+  the same target
+- Good for microservices/container-based apps since one ALB can route to
+  many different services based on path/host rules
+- Supports HTTPS listeners with SSL certificates (via ACM) and can do
+  SSL termination at the load balancer
+- Fixed hostname (xxx.region.elb.amazonaws.com) — client resolves DNS to
+  figure out IP, since ALB itself can scale and change underlying IPs
 
