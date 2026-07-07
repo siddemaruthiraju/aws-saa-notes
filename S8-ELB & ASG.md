@@ -194,26 +194,142 @@ AWS has 4 kinds of managed Load Balancers:
 - ELBs use **Security Groups** to control inbound/outbound traffic.
 
 
-\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+# Section 8 — Elastic Load Balancing (ELB) Notes
 
+## Application Load Balancer (ALB) — Overview
+- ALB operates at Layer 7 (HTTP/HTTPS)
+- Load balances across multiple targets in a target group, and can load
+  balance to multiple applications on the same machine (e.g. containers)
+- Supports HTTP/2 and WebSocket
+- Supports redirects (e.g. HTTP to HTTPS)
+- Routing tables can route to different target groups based on:
+  - Path in URL
+  - Hostname in URL
+  - Query string / headers
+- Great fit for microservices and container-based applications
+  (e.g. Docker, Amazon ECS)
+- Has a port mapping feature to redirect to a dynamic port in ECS
+- In comparison, Classic Load Balancer needs multiple CLBs per application
+  (ALB needs just one, routing to many target groups)
 
-# Section 8 — Application Load Balancer (ALB) Notes
+## Target Groups
+- Can point to: EC2 instances (HTTP), ECS tasks (HTTP), Lambda functions
+  (HTTP request is translated into a JSON event)
+- IP addresses used as targets must be private IPs
+- ALB can route to multiple target groups
+- Health checks are performed at the target group level
 
-- ALB operates at Layer 7 (HTTP/HTTPS) — can inspect and route based on
-  content, not just IP/port like NLB (Layer 4)
-- Routing based on: path (/api/*, /images/*), hostname (api.example.com
-  vs www.example.com), HTTP headers/query strings, or source IP
-- Supports multiple target groups — one ALB can route to EC2 instances,
-  ECS tasks, Lambda functions, or even IP addresses as targets
-- Target groups have their own health checks — ALB stops sending traffic
-  to unhealthy targets
-- Sticky sessions (session affinity) can be enabled at the target group
-  level using an ALB-generated cookie — keeps a user's requests going to
-  the same target
-- Good for microservices/container-based apps since one ALB can route to
-  many different services based on path/host rules
-- Supports HTTPS listeners with SSL certificates (via ACM) and can do
-  SSL termination at the load balancer
-- Fixed hostname (xxx.region.elb.amazonaws.com) — client resolves DNS to
-  figure out IP, since ALB itself can scale and change underlying IPs
+## ALB — Hands-On Steps
+1. Create 2 EC2 instances
+   - Name the instances
+   - Use EC2 user data (fundamental code) in the instance summary
+   - Launch instances
+   - Check that the private IP is working
+2. Launch the Load Balancer
+   - Choose Application Load Balancer
+   - Name it (e.g. Demo-ALB)
+   - Set to Internet-facing, IPv4
+   - Network mapping: deploy in all Availability Zones/locations
+   - Create a new Security Group
+     - Name it (e.g. Demo-SG-load-balancer)
+     - Description: "Allows HTTP into ALB"
+     - Inbound rule: HTTP — Anywhere
+3. Create a Target Group
+   - Target type: Instances
+   - Group name (e.g. Demo-tg-alb)
+   - Protocol: HTTP
+   - Configure health checks
+   - Next → Register targets → select both instances
+   - Target group created
+4. Back in the Load Balancer setup
+   - Select that target group
+   - Listeners and routing: HTTP, port 80
+   - Create the Load Balancer
+5. Once created, copy the LB's DNS name and test it in browser
+   - You'll see "Hello World" but the IP keeps changing on refresh
+     (proof it's load balancing across instances)
 
+## Listener Rules (Advanced)
+- Go to Load Balancers → your LB → select → HTTP:80 listener → Listener Rules
+- Add Rule:
+  - Name it
+  - Conditions: Path, or Host
+  - Action: Return fixed response (e.g. 404 Not Found, custom error)
+  - Set rule priority: 1 = highest, 5 = lowest
+  - Create rule
+- Copy DNS name + add the path/error condition to the URL to see the
+  custom message you configured
+
+## Query String / Parameter-Based Routing
+- One ALB can route to multiple target groups based on query parameters:
+  - Target Group 1: AWS EC2-based
+  - Target Group 2: On-premises, private IP target
+
+## Good to Know
+- Fixed hostname — app servers don't see the client's IP directly
+- The true client IP is inserted in the header:
+  X-Forwarded-For, X-Forwarded-Port, X-Forwarded-Proto
+- Flow: Client IP (e.g. 12.34.56.78) <-> Load Balancer IP (private IP)
+  <-> EC2 instance — this is "connection termination" at the LB
+
+---
+
+# Network Load Balancer (NLB)
+- Operates at Layer 4 (TCP/UDP)
+- Forwards TCP and UDP traffic to your instances
+- Handles millions of requests per second
+- Ultra-low latency
+- Has ONE static IP per Availability Zone, and supports assigning an
+  Elastic IP (useful for whitelisting by IP)
+- Used for extreme performance TCP/UDP use cases
+- NLB (v2): Layer 4, TCP-based traffic
+  - Routes based on TCP rules to a target group for a web/user application
+    (with health checks)
+  - Can also route HTTP traffic to a target group for a search application
+    (with health checks)
+
+## NLB — Target Groups
+- Targets: EC2 instances, IP addresses (must be private IPs)
+- Same concept as ALB target groups, but at Layer 4
+
+## NLB — Hands-On Steps
+1. Create the NLB — same process as ALB up to creating a new Security Group
+2. Create a new Target Group
+   - Protocol: TCP, port 80
+   - Add health check settings
+   - Add timing intervals
+3. After creating, check the DNS name — it will NOT work yet
+4. Configure the Security Group of the instances to allow TCP & HTTP
+   traffic from the Load Balancer
+5. Then the DNS name will work correctly
+
+## NLB Hands-On — Part 2 (Failover Test)
+- Stop one instance and check the target group — you'll see the health
+  check reflect the unhealthy target
+- You can then see only 1 IP address responding
+- When you start the instance again, you'll see traffic switching
+  between both addresses (both healthy again)
+- You can check via the instance directly AND via the load balancer —
+  going through the Load Balancer is more secure
+- To lock it down: go to the instance's Security Group
+  - Change inbound rule: delete the open HTTP rule
+  - Add new rule: HTTP — source = the Load Balancer's Security Group
+  - Now only the Load Balancer can reach the instance directly
+
+---
+
+# Gateway Load Balancer (GWLB)
+- Deploys, scales, and manages a fleet of 3rd-party network virtual
+  appliances in AWS
+  - Examples: firewalls, Intrusion Detection & Prevention Systems (IDS/IPS),
+    Deep Packet Inspection systems, payload manipulation tools
+- Operates at Layer 3 (Network layer) — works with IP packets
+- Combines two functions:
+  - Transparent network gateway — single entry/exit point for all traffic
+  - Load balancer — distributes traffic across your fleet of virtual
+    appliances
+- Uses the GENEVE protocol on port 6081
+
+## GWLB — Target Groups
+- Targets: EC2 instances
+- IP addresses used as targets must be private IPs
