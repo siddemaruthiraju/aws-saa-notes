@@ -315,7 +315,7 @@ If you have difficulty connecting:
 \- Supports \*\*all RDS database engines\*\*
 
 
-# AWS Database 
+# AWS Database+aurora 
 
 ## 1. Amazon RDS & RDS Custom
 ### RDS vs. RDS Custom
