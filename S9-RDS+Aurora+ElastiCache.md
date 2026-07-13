@@ -499,6 +499,41 @@ If you have difficulty connecting:
 | **MariaDB** | 3306 |
 | **Oracle RDS** | 1521 |
 | **MSSQL Server (Microsoft)** | 1433 |
+  
+
+cd ~/aws-saa-notes && cat > section09-rds-aurora-recap.md << 'EOF'
+# Section 9 Recap - RDS, Aurora & ElastiCache
+
+## RDS Core
+- Managed relational DB service (MySQL, PostgreSQL, MariaDB, Oracle, SQL Server)
+- Automated backups, patching, Multi-AZ for HA (standby, not for scaling reads)
+- Read Replicas: for read scaling, async replication, can be cross-region
+- Storage auto-scaling available
+
+## Encrypting an Existing RDS Instance
+- Cannot enable encryption directly on an unencrypted running instance
+- Process: snapshot the unencrypted DB -> copy the snapshot with encryption enabled -> restore new encrypted instance from that snapshot -> switch app connections over
+
+## Aurora vs Standard RDS
+- Aurora: AWS proprietary, MySQL/PostgreSQL compatible, storage auto-scales up to 128TB
+- 6 copies of data across 3 AZs, self-healing storage
+- Aurora Replicas (up to 15) vs MySQL replicas (up to 5) - Aurora replicas have lower replication lag
+- Aurora has own failover priority tiers; faster failover than standard RDS Multi-AZ
+- Aurora Serverless: on-demand autoscaling for unpredictable workloads
+
+## RDS Proxy
+- Sits between app and RDS/Aurora, pools and shares DB connections
+- Reduces connection overhead (useful for Lambda spiky connections)
+- Improves failover time (handles it, app doesn't need to reconnect manually)
+- Requires IAM authentication, enforced SSL
+- Never publicly accessible - must be accessed from within VPC
+
+## ElastiCache
+- In-memory caching (Redis or Memcached) to reduce DB load
+- Redis: persistence, replication, Multi-AZ, pub/sub
+- Memcached: simple, multi-threaded, no persistence
+
+- reviewing existing S9 material, resuming S10 lectures next session
 
 
 
