@@ -83,6 +83,23 @@
 \- After enabling, only NEW objects are replicated by default (not retroactive, unless using S3 Batch Replication).
 
 
+# S3 Storage Classes — Quick Reference
+
+## Overview
+S3 offers multiple storage classes, trading off availability, retrieval time, and cost. Objects can transition between classes via lifecycle rules.
+
+## Classes (high to low cost)
+- **S3 Standard** — high durability, availability, performance. General purpose, frequently accessed data.
+- **S3 Intelligent-Tiering** — auto-moves objects between tiers based on access patterns; no retrieval fees.
+- **S3 Standard-IA (Infrequent Access)** — lower cost than Standard, but has a retrieval fee. For data accessed less often but needs fast access when needed.
+- **S3 One Zone-IA** — same as Standard-IA but stored in a single AZ (not multi-AZ) — cheaper, less resilient (lose the AZ, lose the data).
+- **S3 Glacier Instant Retrieval** — archive storage, milliseconds retrieval, for rarely accessed data.
+- **S3 Glacier Flexible Retrieval** — retrieval takes minutes to hours (expedited/standard/bulk options).
+- **S3 Glacier Deep Archive** — cheapest, retrieval takes hours (12-48h) — long-term archive.
+- **S3 Express One Zone** — newest, single-AZ, very low latency (single-digit ms) for latency-sensitive workloads.
+
+## Key exam point
+Moving objects between classes = **lifecycle rules**. Can transition automatically based on object age.
 
 
 
