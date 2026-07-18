@@ -102,4 +102,25 @@ S3 offers multiple storage classes, trading off availability, retrieval time, an
 Moving objects between classes = **lifecycle rules**. Can transition automatically based on object age.
 
 
+# S3 Security — Quick Reference
+
+## Access Control Layers
+- **IAM Policies** — attached to users/roles, control what actions they can take on S3.
+- **Bucket Policies** — attached to the bucket itself (resource-based), JSON format, can grant cross-account or public access.
+- **Object ACLs** (legacy, often disabled) — finer-grained, per-object permissions. Bucket ACLs also exist (rarely used now).
+
+## Bucket Policy Basics
+- JSON document with Effect (Allow/Deny), Principal (who), Action (e.g., s3:GetObject), Resource (which bucket/objects).
+- To block ALL public access regardless of other settings → **S3 Block Public Access** settings at bucket/account level (safety switch, overrides policies).
+
+## Encryption
+- **SSE-S3** — Amazon manages the keys, encryption at rest (AES-256).
+- **SSE-KMS** — uses AWS KMS to manage keys, more control + audit trail via CloudTrail.
+- **SSE-C** — customer provides their own encryption key, AWS doesn't store it.
+- **Client-side encryption** — encrypt before uploading, S3 just stores encrypted blob.
+
+## Key exam point
+Bucket Policy vs IAM Policy — if principal is in the SAME account, either works. For cross-account or public access, use Bucket Policy.
+
+
 
