@@ -123,4 +123,21 @@ Moving objects between classes = **lifecycle rules**. Can transition automatical
 Bucket Policy vs IAM Policy — if principal is in the SAME account, either works. For cross-account or public access, use Bucket Policy.
 
 
+# S3 Website Hosting & Versioning — Quick Reference
+
+## Static Website Hosting
+- Enable "Static Website Hosting" in bucket properties, specify index document (e.g., index.html) and optional error document.
+- Bucket + objects must be made public via bucket policy (s3:GetObject to Principal: "*").
+- Website endpoint URL format is region-specific, different from the regular S3 object URL.
+- Common gotcha: 403 Forbidden usually means bucket policy isn't allowing public read, not a website-config issue.
+
+## Versioning Recap
+- Enabled per-bucket, not per-object.
+- Once enabled, can be Suspended but never fully "disabled" (existing versions remain).
+- Deleting a versioned object doesn't actually delete it — adds a "delete marker"; the object is recoverable by removing the marker.
+- Useful for Project 1 (S3 static site) — enabling versioning protects against accidental overwrites while building/testing the site.
+
+
+
+
 
