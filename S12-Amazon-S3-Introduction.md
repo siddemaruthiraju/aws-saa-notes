@@ -139,5 +139,58 @@ Bucket Policy vs IAM Policy — if principal is in the SAME account, either work
 
 
 
+# Section 12: Amazon S3 - Introduction
+
+## Overview
+- One of the main building blocks of AWS
+- Advertised as **"infinitely scaling"** storage
+- Many websites use Amazon S3 as a backbone
+- Many AWS services integrate with Amazon S3 as well
+
+## Use Cases
+- Backup & storage
+- Disaster recovery
+- Archive
+- Hybrid cloud storage
+- Application hosting
+- Media hosting
+- Data lakes & big data analytics
+- Software delivery
+- Static website hosting
+
+## Amazon S3 Buckets
+- Allows people to store objects (files) in buckets (directories)
+- Buckets are defined at the **region level**
+- S3 looks like a global service, but buckets are created in a specific region
+
+### Bucket Naming
+- Bucket names must be **globally unique** across all AWS accounts (shared global namespace)
+- S3 Access Points have their own regional namespace, allowing reuse of the same access point name across different regions
+
+### Naming Constraints
+- No uppercase letters, no underscores
+- Not formatted as an IP address
+- Must start with a lowercase letter or number
+- Must **NOT** start with the prefix `xn--`
+- Must **NOT** end with the suffix `-s3alias`
+
+## Amazon S3 Objects
+- Objects (files) have a **key**
+- The key is the **full path** of the object
+  - Example: `s3://my-bucket/my-file.txt`
+  - Example with prefix: `s3://my-bucket/my-folder1/another-folder1/my-file.txt`
+- The key = prefix + object name
+
+### Key Concepts
+- There is **no real concept of "directories"** within buckets — just keys with very long names that contain slashes (`/`)
+- Object **value** = the content of the body (the actual file data)
+- **Max object size** = 5TB
+- If uploading a file larger than **5GB**, you must use **Multi-Part Upload**
+
+### Object Metadata & Extras
+- **Metadata**: list of text key/value pairs — system or user metadata
+- **Tags**: Unicode key/value pairs (up to 10) — useful for security and lifecycle rules
+- **Version ID**: assigned if versioning is enabled on the bucket
+
 
 
